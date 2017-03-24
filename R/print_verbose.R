@@ -50,7 +50,7 @@ print_diagnostics <- function(verbose, opts, curr_iter, tot_iter, chain, varsel,
       ## r_m
       if (!varsel) {
         nm <- "r"
-        rate <- colMeans(chain$acc.r[2:s, ])
+        rate <- colMeans(chain$acc.r[2:s, , drop = FALSE])
         if (length(rate) > 1) nm <- paste0(nm, seq_along(rate))
         accep_rates %<>% rbind(data.frame(param = nm, rate = rate))
       } else {
@@ -81,8 +81,8 @@ print_diagnostics <- function(verbose, opts, curr_iter, tot_iter, chain, varsel,
         chain$Z <- Z
         if (hier_varsel) chain$groups <- groups
         ests <- ExtractEsts(chain, q = c(0.025, 0.975), sel = 2:s)
-        ests$h <- ests$h[c(1,2,nrow(ests$h)), ]
-        summ <- with(ests, rbind(beta, sigsq.eps, r, lambda, h))
+        #ests$h <- ests$h[c(1,2,nrow(ests$h)), ]
+        summ <- with(ests, rbind(beta, sigsq.eps, r, lambda))
         summ <- data.frame(param = rownames(summ), round(summ, verbose_digits))
         rownames(summ) <- NULL
         print(summ)

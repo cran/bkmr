@@ -4,7 +4,8 @@
 \alias{ComputePostmeanHnew}
 \title{Compute the posterior mean and variance of \code{h} at a new predictor values}
 \usage{
-ComputePostmeanHnew(fit, y = NULL, Z = NULL, X = NULL, Znew, sel = NULL)
+ComputePostmeanHnew(fit, y = NULL, Z = NULL, X = NULL, Znew = NULL,
+  sel = NULL, method = "approx")
 }
 \arguments{
 \item{fit}{An object containing the results returned by a the \code{kmbayes} function}
@@ -15,11 +16,19 @@ ComputePostmeanHnew(fit, y = NULL, Z = NULL, X = NULL, Znew, sel = NULL)
 
 \item{X}{an \code{n}-by-\code{K} matrix of covariate data where each row represents an observation and each column represents a covariate. Should not contain an intercept column.}
 
-\item{Znew}{optional matrix of new predictor values at which to predict new \code{h}, where each row represents a new observation. This will slow down the model fitting.}
+\item{Znew}{matrix of new predictor values at which to predict new \code{h}, where each row represents a new observation. If set to NULL then will default to using the observed exposures Z.}
 
-\item{sel}{A vector selecting which iterations of the BKMR fit should be retained for inference. Currently only implemented for \code{method == "r"}.}
+\item{sel}{selects which iterations of the MCMC sampler to use for inference; see details}
+
+\item{method}{method for obtaining posterior summaries at a vector of new points. Options are "approx" and "exact"; defaults to "approx", which is faster particularly for large datasets; see details}
 }
 \description{
-Function to approximate the posterior mean and variance as a function of the estimated tau, lambda, beta, and sigsq.eps
+Compute the posterior mean and variance of \code{h} at a new predictor values
 }
-
+\details{
+\itemize{
+  \item If \code{method == "approx"} then calls the function \code{\link{ComputePostmeanHnew.approx}}. In this case, the argument \code{sel} defaults to the second half of the MCMC iterations.
+  \item If \code{method == "exact"} then calls the function \code{\link{ComputePostmeanHnew.exact}}. In this case, the argument \code{sel} defaults to keeping every 10 iterations after dropping the first 50\% of samples, or if this results in fewer than 100 iterations, than 100 iterations are kept
+}
+For guided examples and additional information, go to \url{https://jenfb.github.io/bkmr/overview.html}
+}

@@ -5,7 +5,7 @@
 \title{Calculate overall risk summaries}
 \usage{
 OverallRiskSummaries(fit, y = NULL, Z = NULL, X = NULL, qs = seq(0.25,
-  0.75, by = 0.05), q.fixed = 0.5, preds.method = "approx", sel = NULL)
+  0.75, by = 0.05), q.fixed = 0.5, method = "approx", sel = NULL)
 }
 \arguments{
 \item{fit}{An object containing the results returned by a the \code{kmbayes} function}
@@ -20,11 +20,17 @@ OverallRiskSummaries(fit, y = NULL, Z = NULL, X = NULL, qs = seq(0.25,
 
 \item{q.fixed}{a second quantile at which to compare the estimated \code{h} function}
 
-\item{preds.method}{method for obtaining posterior summaries at a vector of new point. Currently only implemented for \code{preds.method = "approx"}}
+\item{method}{method for obtaining posterior summaries at a vector of new points. Options are "approx" and "exact"; defaults to "approx", which is faster particularly for large datasets; see details}
 
-\item{sel}{logical expression indicating samples to keep; defaults to keeping the second half of all samples}
+\item{sel}{selects which iterations of the MCMC sampler to use for inference; see details}
 }
 \description{
-Compare estimated \code{h} function when all predictors are at a particular quantile to when all are at a second fixed percentile
+Compare estimated \code{h} function when all predictors are at a particular quantile to when all are at a second fixed quantile
 }
-
+\details{
+\itemize{
+  \item If \code{method == "approx"} then calls the function \code{\link{ComputePostmeanHnew.approx}}. In this case, the argument \code{sel} defaults to the second half of the MCMC iterations.
+  \item If \code{method == "exact"} then calls the function \code{\link{ComputePostmeanHnew.exact}}. In this case, the argument \code{sel} defaults to keeping every 10 iterations after dropping the first 50\% of samples, or if this results in fewer than 100 iterations, than 100 iterations are kept
+}
+For guided examples and additional information, go to \url{https://jenfb.github.io/bkmr/overview.html}
+}

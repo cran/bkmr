@@ -1,4 +1,4 @@
-PredictorResponseUnivarVar <- function(whichz = 1, fit, y, Z, X, preds.method = "approx", ngrid = 50, q.fixed = 0.5, sel = NULL, min.plot.dist = Inf, center = TRUE, z.names = colnames(Z), ...) {
+PredictorResponseUnivarVar <- function(whichz = 1, fit, y, Z, X, method = "approx", ngrid = 50, q.fixed = 0.5, sel = NULL, min.plot.dist = Inf, center = TRUE, z.names = colnames(Z), ...) {
 
     if (ncol(Z) < 2) stop("requires there to be at least 2 predictor variables")
 
@@ -25,15 +25,12 @@ PredictorResponseUnivarVar <- function(whichz = 1, fit, y, Z, X, preds.method = 
         }
     }
 
-    if(preds.method == "approx") {
-        preds <- ComputePostmeanHnew(fit = fit, y = y, Z = Z, X = X, Znew = newz.grid, sel = sel)
-        preds.plot <- preds$postmean
-        se.plot <- sqrt(diag(preds$postvar))
-    } else if(preds.method == "samp") {
-        stop("not yet implemented")
-#         preds <- SampleHnew(Znew = newz.grid, fit = fit, Z = Z, X = X, y = y, ...)
-#         preds.plot <- colMeans(preds, na.rm = TRUE)
-#         se.plot <- apply(preds, 2, sd, na.rm = TRUE)
+    if (method %in% c("approx", "exact")) {
+      preds <- ComputePostmeanHnew(fit = fit, y = y, Z = Z, X = X, Znew = newz.grid, sel = sel, method = method)
+      preds.plot <- preds$postmean
+      se.plot <- sqrt(diag(preds$postvar))
+    } else {
+      stop("method must be one of c('approx', 'exact')")
     }
     if(center) preds.plot <- preds.plot - mean(preds.plot)
     if(!is.null(min.plot.dist)) {
@@ -56,35 +53,40 @@ PredictorResponseUnivarVar <- function(whichz = 1, fit, y, Z, X, preds.method = 
 #' @param ngrid number of grid points to cover the range of each predictor (column in \code{Z})
 #' @param min.plot.dist specifies a minimum distance that a new grid point needs to be from an observed data point in order to compute the prediction; points further than this will not be computed
 #' @param center flag for whether to scale the exposure-response function to have mean zero
+#' @details For guided examples, go to \url{https://jenfb.github.io/bkmr/overview.html}
 #'
 #' @export
-PredictorResponseUnivar <- function(fit, y = NULL, Z = NULL, X = NULL, which.z = 1:ncol(Z), preds.method = "approx", ngrid = 50, q.fixed = 0.5, sel = NULL, min.plot.dist = Inf, center = TRUE, z.names = colnames(Z), ...) {
+PredictorResponseUnivar <- function(fit, y = NULL, Z = NULL, X = NULL, which.z = 1:ncol(Z), method = "approx", ngrid = 50, q.fixed = 0.5, sel = NULL, min.plot.dist = Inf, center = TRUE, z.names = colnames(Z), ...) {
   
   if (inherits(fit, "bkmrfit")) {
     y <- fit$y
     Z <- fit$Z
     X <- fit$X
   }
- 
-    df <- dplyr::data_frame()
-    for(i in which.z) {
-        res <- PredictorResponseUnivarVar(whichz = i, fit = fit, y = y, Z = Z, X = X, preds.method = preds.method, ngrid = ngrid, q.fixed = q.fixed, sel = sel, min.plot.dist = min.plot.dist, center = center, z.names = z.names, ...)
-        df0 <- dplyr::mutate(res, variable = z.names[i]) %>%
-            dplyr::select_(~variable, ~z, ~est, ~se)
-        df <- dplyr::bind_rows(df, df0)
-    }
-    df$variable <- factor(df$variable, levels = z.names[which.z])
-    df
+
+  if (is.null(z.names)) {
+    z.names <- paste0("z", 1:ncol(Z))
+  }
+  
+  df <- dplyr::data_frame()
+  for(i in which.z) {
+    res <- PredictorResponseUnivarVar(whichz = i, fit = fit, y = y, Z = Z, X = X, method = method, ngrid = ngrid, q.fixed = q.fixed, sel = sel, min.plot.dist = min.plot.dist, center = center, z.names = z.names, ...)
+    df0 <- dplyr::mutate(res, variable = z.names[i]) %>%
+      dplyr::select_(~variable, ~z, ~est, ~se)
+    df <- dplyr::bind_rows(df, df0)
+  }
+  df$variable <- factor(df$variable, levels = z.names[which.z])
+  df
 }
 
 
 
-PredictorResponseBivarPair <- function(fit, y, Z, X, whichz1 = 1, whichz2 = 2, whichz3, preds.method = "approx", prob = 0.5, q.fixed = 0.5, sel = NULL, ngrid = 50, min.plot.dist = 0.5, center = TRUE, ...) {
+PredictorResponseBivarPair <- function(fit, y, Z, X, whichz1 = 1, whichz2 = 2, whichz3 = NULL, method = "approx", prob = 0.5, q.fixed = 0.5, sel = NULL, ngrid = 50, min.plot.dist = 0.5, center = TRUE, ...) {
     if(ncol(Z) < 3) stop("requires there to be at least 3 Z variables")
 
     if(is.null(colnames(Z))) colnames(Z) <- paste0("z", 1:ncol(Z))
 
-    if(missing(whichz3)) {
+    if(is.null(whichz3)) {
         ord <- c(whichz1, whichz2, setdiff(1:ncol(Z), c(whichz1, whichz2)))
     } else {
         ord <- c(whichz1, whichz2, whichz3, setdiff(1:ncol(Z), c(whichz1, whichz2, whichz3)))
@@ -112,15 +114,12 @@ PredictorResponseBivarPair <- function(fit, y, Z, X, whichz1 = 1, whichz2 = 2, w
         }
     }
 
-    if(preds.method == "approx") {
-        preds <- ComputePostmeanHnew(fit = fit, y = y, Z = Z, X = X, Znew = newz.grid, sel = sel)
-        preds.plot <- preds$postmean
-        se.plot <- sqrt(diag(preds$postvar))
-    } else if(preds.method == "samp") {
-        stop("not yet implemented")
-#         preds <- SampleHnew(Znew = newz.grid, fit = fit, Z = Z, X = X, y = y, ...)
-#         preds.plot <- colMeans(preds)
-#         se.plot <- apply(preds, 2, sd)
+    if (method %in% c("approx", "exact")) {
+      preds <- ComputePostmeanHnew(fit = fit, y = y, Z = Z, X = X, Znew = newz.grid, sel = sel, method = method)
+      preds.plot <- preds$postmean
+      se.plot <- sqrt(diag(preds$postvar))
+    } else {
+      stop("method must be one of c('approx', 'exact')")
     }
     if(center) preds.plot <- preds.plot - mean(preds.plot)
     if(!is.null(min.plot.dist)) {
@@ -144,13 +143,21 @@ PredictorResponseBivarPair <- function(fit, y, Z, X, whichz1 = 1, whichz2 = 2, w
 #' @param z.pairs data frame showing which pairs of pollutants to plot
 #' @param ngrid number of grid points in each dimension
 #' @param verbose TRUE or FALSE: flag of whether to print intermediate output to the screen
+#' @details For guided examples, go to \url{https://jenfb.github.io/bkmr/overview.html}
 #' @export
-PredictorResponseBivar <- function(fit, y = NULL, Z = NULL, X = NULL, z.pairs = NULL, preds.method = "approx", ngrid = 50, q.fixed = 0.5, sel = NULL, min.plot.dist = 0.5, center = TRUE, z.names = colnames(Z), verbose = TRUE, ...) {
+PredictorResponseBivar <- function(fit, y = NULL, Z = NULL, X = NULL, z.pairs = NULL, method = "approx", ngrid = 50, q.fixed = 0.5, sel = NULL, min.plot.dist = 0.5, center = TRUE, z.names = colnames(Z), verbose = TRUE, ...) {
   
   if (inherits(fit, "bkmrfit")) {
     if (is.null(y)) y <- fit$y
     if (is.null(Z)) Z <- fit$Z
     if (is.null(X)) X <- fit$X
+  }
+  
+  if (is.null(z.names)) {
+    z.names <- colnames(Z)
+    if (is.null(z.names)) {
+      z.names <- paste0("z", 1:ncol(Z))
+    }
   }
   
   if (is.null(z.pairs)) {
@@ -177,7 +184,7 @@ PredictorResponseBivar <- function(fit, y = NULL, Z = NULL, X = NULL, z.pairs = 
     }
     if(compute) {
       if(verbose) message("Pair ", i, " out of ", nrow(z.pairs))
-      res <- PredictorResponseBivarPair(fit = fit, y = y, Z = Z, X = X, whichz1 = whichz1, whichz2 = whichz2, preds.method = preds.method, ngrid = ngrid, q.fixed = q.fixed, sel = sel, min.plot.dist = min.plot.dist, center = center, z.names = z.names, ...)
+      res <- PredictorResponseBivarPair(fit = fit, y = y, Z = Z, X = X, whichz1 = whichz1, whichz2 = whichz2, method = method, ngrid = ngrid, q.fixed = q.fixed, sel = sel, min.plot.dist = min.plot.dist, center = center, z.names = z.names, ...)
       df0 <- res
       df0$variable1 <- z.name1
       df0$variable2 <- z.name2
@@ -197,10 +204,12 @@ PredictorResponseBivar <- function(fit, y = NULL, Z = NULL, X = NULL, z.pairs = 
 #' 
 #' @export
 #' @inheritParams kmbayes
+#' @inheritParams PredictorResponseBivar
 #' @param pred.resp.df object obtained from running the function \code{\link{PredictorResponseBivar}}
 #' @param qs vector of quantiles at which to fix the second variable
 #' @param both_pairs flag indicating whether, if \code{h(z1)} is being plotted for z2 fixed at different levels, that they should be plotted in the reverse order as well (for \code{h(z2)} at different levels of z1) 
-PredictorResponseBivarLevels <- function(pred.resp.df, Z = NULL, qs = c(0.25, 0.5, 0.75), both_pairs = TRUE) {
+#' @details For guided examples, go to \url{https://jenfb.github.io/bkmr/overview.html}
+PredictorResponseBivarLevels <- function(pred.resp.df, Z = NULL, qs = c(0.25, 0.5, 0.75), both_pairs = TRUE, z.names = NULL) {
   var.pairs <- dplyr::distinct(dplyr::select_(pred.resp.df, ~variable1, ~variable2))
   if (both_pairs) {
     var.pairs.rev <- dplyr::data_frame(
@@ -210,6 +219,14 @@ PredictorResponseBivarLevels <- function(pred.resp.df, Z = NULL, qs = c(0.25, 0.
     )
     var.pairs <- rbind(var.pairs, var.pairs.rev)
   }
+
+  if (is.null(z.names)) {
+    z.names <- colnames(Z)
+    if (is.null(z.names)) {
+      z.names <- paste0("z", 1:ncol(Z))
+      colnames(Z) <- z.names
+    }
+  }
   
   df <- data.frame()
   for (i in 1:nrow(var.pairs)) {
@@ -218,6 +235,16 @@ PredictorResponseBivarLevels <- function(pred.resp.df, Z = NULL, qs = c(0.25, 0.
     preds <- pred.resp.df[pred.resp.df$variable1 == var1 & pred.resp.df$variable2 == var2, ]
     if (nrow(preds) == 0) {
       preds <- pred.resp.df[pred.resp.df$variable1 == var2 & pred.resp.df$variable2 == var1, ]
+      preds.rev <- dplyr::data_frame(
+        variable1 = preds$variable2,
+        variable2 = preds$variable1,
+        z1 = preds$z2,
+        z2 = preds$z1,
+        est = preds$est,
+        se = preds$se
+      )
+      preds <- preds.rev
+      preds <- dplyr::arrange_(preds, ~z2, ~z1)
     }
     
     ngrid <- sqrt(nrow(preds))
