@@ -2,10 +2,19 @@
 % Please edit documentation in R/InvestigatePrior_rm.R
 \name{PlotPriorFits}
 \alias{PlotPriorFits}
-\title{Plot of exposure-response function from univariate KMR fot}
+\title{Plot of exposure-response function from univariate KMR fit}
 \usage{
-PlotPriorFits(y, X, Z, fits, which.z = NULL, which.q = NULL,
-  plot.resid = TRUE, ylim = NULL, ...)
+PlotPriorFits(
+  y,
+  X,
+  Z,
+  fits,
+  which.z = NULL,
+  which.q = NULL,
+  plot.resid = TRUE,
+  ylim = NULL,
+  ...
+)
 }
 \arguments{
 \item{y}{a vector of outcome data of length \code{n}.}

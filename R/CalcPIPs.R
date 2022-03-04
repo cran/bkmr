@@ -19,7 +19,7 @@ CalcGroupPIPs <- function(fit, sel = NULL) {
 
 #' Calculate conditional predictor specific posterior inclusion probabilities
 #'
-#' For those predictors within a multi-preditor group, as defined using the \code{groups} argument, the posterior inclusion probabilities for the predictor conditional on the group being selected into the model.
+#' For those predictors within a multi-predictor group, as defined using the \code{groups} argument, the posterior inclusion probabilities for the predictor conditional on the group being selected into the model.
 #' 
 #' @inheritParams ExtractEsts
 #' @export
@@ -97,8 +97,8 @@ ExtractPIPs <- function(fit, sel = NULL, z.names = NULL) {
       df$group <- groups
       grps <- unique(groups)
       groupincl.probs <- sapply(grps, function(x) mean(rowSums(fit$delta[sel, groups == x, drop = FALSE]) > 0))
-      df.group <- dplyr::data_frame(group = grps,
-                                    groupPIP = groupincl.probs)
+      df.group <- dplyr::tibble(group = grps,
+                                groupPIP = groupincl.probs)
       df <- dplyr::inner_join(df, df.group, by = "group")
       
       ## within-group conditional PIP

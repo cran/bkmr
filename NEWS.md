@@ -1,3 +1,17 @@
+# bkmr 0.2.1
+
+## Bug fixes
+
+* allowable values for starting parameter for `r[m]` parameters updated as follows
+
+  * no longer truncated to a single value (when `varsel = FALSE` and `rmethod = "varying"`)
+
+  * can be equal to 0 (when `varsel = TRUE`)
+
+* Error no longer generated if starting values for h.hat are not positive 
+
+* When checking class of an object, use 'inherits()' instead of 'class()'
+
 # bkmr 0.2.0
 
 ## Major changes

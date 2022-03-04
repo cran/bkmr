@@ -66,8 +66,8 @@ makeVcomps <- function(r, lambda, Z, data.comps) {
 #' @param starting.values list of starting values for each parameter. If not specified default values will be chosen.
 #' @param control.params list of parameters specifying the prior distributions and tuning parameters for the MCMC algorithm. If not specified default values will be chosen.
 #' @param varsel TRUE or FALSE: indicator for whether to conduct variable selection on the Z variables in \code{h}
-#' @param groups optional vector (of length \code{M}) of group indictors for fitting hierarchical variable selection if varsel=TRUE. If varsel=TRUE without group specification, component-wise variable selections will be performed.
-#' @param knots optional matrix of knot locations for implementing the Gaussian predictive process of Banerjee et al (2008). Currently only implemented for models without a random intercept.
+#' @param groups optional vector (of length \code{M}) of group indicators for fitting hierarchical variable selection if varsel=TRUE. If varsel=TRUE without group specification, component-wise variable selections will be performed.
+#' @param knots optional matrix of knot locations for implementing the Gaussian predictive process of Banerjee et al. (2008). Currently only implemented for models without a random intercept.
 #' @param ztest optional vector indicating on which variables in Z to conduct variable selection (the remaining variables will be forced into the model).
 #' @param rmethod for those predictors being forced into the \code{h} function, the method for sampling the \code{r[m]} values. Takes the value of 'varying' to allow separate \code{r[m]} for each predictor; 'equal' to force the same \code{r[m]} for each predictor; or 'fixed' to fix the \code{r[m]} to their starting values
 #' @param est.h TRUE or FALSE: indicator for whether to sample from the posterior distribution of the subject-specific effects h_i within the main sampler. This will slow down the model fitting.
@@ -90,9 +90,9 @@ kmbayes <- function(y, Z, X = NULL, iter = 1000, family = "gaussian", id = NULL,
   ##Argument check 1, required arguments without defaults
   ##check vector/matrix sizes
   stopifnot (length(y) > 0, is.numeric(y), anyNA(y) == FALSE)
-  if (inherits(class(Z), "matrix") == FALSE)  Z <- as.matrix(Z)
+  if (!inherits(Z, "matrix"))  Z <- as.matrix(Z)
   stopifnot (is.numeric(Z), nrow(Z) == length(y), anyNA(Z) == FALSE)
-  if (inherits(class(X), "matrix") == FALSE)  X <- as.matrix(X)
+  if (!inherits(X, "matrix"))  X <- as.matrix(X)
   stopifnot (is.numeric(X), nrow(X) == length(y), anyNA(X) == FALSE) 
   
   ##Argument check 2: for those with defaults, write message and reset to default if invalid
@@ -133,11 +133,11 @@ kmbayes <- function(y, Z, X = NULL, iter = 1000, family = "gaussian", id = NULL,
     }
   }
   if (!is.null(Znew)) { 
-    if (class(Znew) != "matrix")  Znew <- as.matrix(Znew)
+    if (!inherits(Znew, "matrix"))  Znew <- as.matrix(Znew)
     stopifnot(is.numeric(Znew), ncol(Znew) == ncol(Z), anyNA(Znew) == FALSE)
   }
   if (!is.null(knots)) { 
-    if (class(knots) != "matrix")  knots <- as.matrix(knots)
+    if (!inherits(knots, "matrix"))  knots <- as.matrix(knots)
     stopifnot(is.numeric(knots), ncol(knots )== ncol(Z), anyNA(knots) == FALSE)
   }
   if (!is.null(groups)) { 
@@ -201,7 +201,7 @@ kmbayes <- function(y, Z, X = NULL, iter = 1000, family = "gaussian", id = NULL,
   ## components to predict h(Znew)
   if (!is.null(Znew)) {
     if (is.null(dim(Znew))) Znew <- matrix(Znew, nrow=1)
-    if (class(Znew) == "data.frame") Znew <- data.matrix(Znew)
+    if (inherits(Znew, "data.frame")) Znew <- data.matrix(Znew)
     if (ncol(Z) != ncol(Znew)) {
       stop("Znew must have the same number of columns as Z")
     }
@@ -265,7 +265,7 @@ kmbayes <- function(y, Z, X = NULL, iter = 1000, family = "gaussian", id = NULL,
     starting.values <- starting.values0
   } else {
     starting.values <- modifyList(starting.values0, starting.values)
-    validateStartingValues (varsel, y, X, Z, starting.values)
+    validateStartingValues(varsel, y, X, Z, starting.values, rmethod)
   }
   if (family == "gaussian") {
     if (is.null(starting.values$beta) | is.null(starting.values$sigsq.eps)) {
@@ -310,8 +310,8 @@ kmbayes <- function(y, Z, X = NULL, iter = 1000, family = "gaussian", id = NULL,
   if (length(starting.values$delta) > ncol(Z)) {
     starting.values$delta <- starting.values$delta[1:ncol(Z)]
   }
-  if (varsel==FALSE & length(starting.values$r) > 1) {
-    starting.values$r <- starting.values$r[1]
+  if (varsel==FALSE & rmethod == "equal" & length(starting.values$r) > 1) {
+    starting.values$r <- starting.values$r[1] ## this should only happen if rmethod == "equal"
   } else if (length(starting.values$r) > ncol(Z)) {
     starting.values$r <- starting.values$r[1:ncol(Z)]
   }

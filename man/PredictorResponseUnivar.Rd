@@ -4,10 +4,21 @@
 \alias{PredictorResponseUnivar}
 \title{Plot univariate predictor-response function on a new grid of points}
 \usage{
-PredictorResponseUnivar(fit, y = NULL, Z = NULL, X = NULL,
-  which.z = 1:ncol(Z), method = "approx", ngrid = 50, q.fixed = 0.5,
-  sel = NULL, min.plot.dist = Inf, center = TRUE, z.names = colnames(Z),
-  ...)
+PredictorResponseUnivar(
+  fit,
+  y = NULL,
+  Z = NULL,
+  X = NULL,
+  which.z = 1:ncol(Z),
+  method = "approx",
+  ngrid = 50,
+  q.fixed = 0.5,
+  sel = NULL,
+  min.plot.dist = Inf,
+  center = TRUE,
+  z.names = colnames(Z),
+  ...
+)
 }
 \arguments{
 \item{fit}{An object containing the results returned by a the \code{kmbayes} function}
@@ -34,7 +45,7 @@ PredictorResponseUnivar(fit, y = NULL, Z = NULL, X = NULL,
 
 \item{z.names}{optional vector of names for the columns of \code{z}}
 
-\item{...}{other argumentd to pass on to the prediction function}
+\item{...}{other arguments to pass on to the prediction function}
 }
 \description{
 Plot univariate predictor-response function on a new grid of points

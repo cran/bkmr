@@ -4,9 +4,19 @@
 \alias{SingVarIntSummaries}
 \title{Single Variable Interaction Summaries}
 \usage{
-SingVarIntSummaries(fit, y = NULL, Z = NULL, X = NULL,
-  which.z = 1:ncol(Z), qs.diff = c(0.25, 0.75), qs.fixed = c(0.25, 0.75),
-  method = "approx", sel = NULL, z.names = colnames(Z), ...)
+SingVarIntSummaries(
+  fit,
+  y = NULL,
+  Z = NULL,
+  X = NULL,
+  which.z = 1:ncol(Z),
+  qs.diff = c(0.25, 0.75),
+  qs.fixed = c(0.25, 0.75),
+  method = "approx",
+  sel = NULL,
+  z.names = colnames(Z),
+  ...
+)
 }
 \arguments{
 \item{fit}{An object containing the results returned by a the \code{kmbayes} function}
@@ -29,7 +39,7 @@ SingVarIntSummaries(fit, y = NULL, Z = NULL, X = NULL,
 
 \item{z.names}{optional vector of names for the columns of \code{z}}
 
-\item{...}{other argumentd to pass on to the prediction function}
+\item{...}{other arguments to pass on to the prediction function}
 }
 \description{
 Compare the single-predictor health risks when all of the other predictors in Z are fixed to their a specific quantile to when all of the other predictors in Z are fixed to their a second specific quantile.

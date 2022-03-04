@@ -248,7 +248,7 @@ h.update <- function(lambda, Vcomps, sigsq.eps, y, X, beta, r, Z, data.comps) {
 		##h.postvar <- sigsq.eps*lamKVinv
 		h.postvar <- sigsq.eps*lambda*(K - lamKVinv%*%K)
 		h.postvar.sqrt <- try(chol(h.postvar), silent=TRUE)
-		if(class(h.postvar.sqrt) == "try-error") {
+		if(inherits(h.postvar.sqrt, "try-error")) {
 			sigsvd <- svd(h.postvar)
 			h.postvar.sqrt <- t(sigsvd$v %*% (t(sigsvd$u) * sqrt(sigsvd$d)))
 		}
@@ -287,7 +287,7 @@ newh.update <- function(Z, Znew, Vcomps, lambda, sigsq.eps, r, y, X, beta, data.
 		Sigma.hnew <- lambda[1]*sigsq.eps*(Kmat1 - lamK10Vinv %*% t(Kmat10))
 		mu.hnew <- lamK10Vinv %*% (y - X%*%beta)
 		root.Sigma.hnew <- try(chol(Sigma.hnew), silent=TRUE)
-		if(class(root.Sigma.hnew) == "try-error") {
+		if(inherits(root.Sigma.hnew, "try-error")) {
 			sigsvd <- svd(Sigma.hnew)
 			root.Sigma.hnew <- t(sigsvd$v %*% (t(sigsvd$u) * sqrt(sigsvd$d)))
 		}
@@ -318,7 +318,7 @@ newh.update <- function(Z, Znew, Vcomps, lambda, sigsq.eps, r, y, X, beta, data.
 ## function to obtain posterior samples of h(znew) from fit of Bayesian kernel machine regression
 predz.samps <- function(fit, Znew, verbose = TRUE) {
 	if(is.null(dim(Znew))) Znew <- matrix(Znew, nrow=1)
-	if(class(Znew) == "data.frame") Znew <- data.matrix(Znew)
+	if(inherits(Znew, "data.frame")) Znew <- data.matrix(Znew)
 	Z <- fit$Z
 	if(ncol(Z) != ncol(Znew)) {
 		stop("Znew must have the same number of columns as Z")
@@ -335,7 +335,7 @@ predz.samps <- function(fit, Znew, verbose = TRUE) {
 ## function to approximate the posterior mean and variance as a function of the estimated tau, lambda, beta, and sigsq.eps
 newh.postmean <- function(fit, Znew, sel) {
 	if(is.null(dim(Znew))) Znew <- matrix(Znew, nrow=1)
-	if(class(Znew) == "data.frame") Znew <- data.matrix(Znew)
+	if(inherits(Znew, "data.frame")) Znew <- data.matrix(Znew)
 
 	Z <- fit$Z
 	X <- fit$X

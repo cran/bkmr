@@ -53,7 +53,7 @@ InvestigatePrior <- function(y, Z, X, ngrid = 50, q.seq = c(2, 1, 1/2, 1/4, 1/8,
       Kmat10 <- Kmat[(n0+1):nall,1:n0 ,drop=FALSE]
       U <- try(t(chol(K)), silent=TRUE)
       # all.equal(K, U %*% t(U))
-      if(class(U) == "try-error") {
+      if(inherits(U, "try-error")) {
         sigsvd <- svd(K)
         U <- t(sigsvd$v %*% (t(sigsvd$u) * sqrt(sigsvd$d)))
         # all.equal(K, U %*% t(U), check.attributes=FALSE)
@@ -77,7 +77,7 @@ InvestigatePrior <- function(y, Z, X, ngrid = 50, q.seq = c(2, 1, 1/2, 1/4, 1/8,
   res <- list(q.seq = q.seq, r.seq = r.seq, Drange = Drange, Znew = Znew.mat, resids = resids, preds = preds, h.hat = h.hat.ests)
 }
 
-#' Plot of exposure-response function from univariate KMR fot
+#' Plot of exposure-response function from univariate KMR fit
 #' 
 #' Plot the estimated \code{h(z[m])} estimated from frequentist KMR for \code{r[m]} fixed to specific values 
 #' 
