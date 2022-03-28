@@ -71,7 +71,7 @@ makeVcomps <- function(r, lambda, Z, data.comps) {
 #' @param ztest optional vector indicating on which variables in Z to conduct variable selection (the remaining variables will be forced into the model).
 #' @param rmethod for those predictors being forced into the \code{h} function, the method for sampling the \code{r[m]} values. Takes the value of 'varying' to allow separate \code{r[m]} for each predictor; 'equal' to force the same \code{r[m]} for each predictor; or 'fixed' to fix the \code{r[m]} to their starting values
 #' @param est.h TRUE or FALSE: indicator for whether to sample from the posterior distribution of the subject-specific effects h_i within the main sampler. This will slow down the model fitting.
-#' @return an object of class "bkmrfit", which has the associated methods:
+#' @return an object of class "bkmrfit" (containing the posterior samples from the model fit), which has the associated methods:
 #' \itemize{
 #'   \item \code{\link{print}} (i.e., \code{\link{print.bkmrfit}}) 
 #'   \item \code{\link{summary}} (i.e., \code{\link{summary.bkmrfit}})
@@ -81,6 +81,20 @@ makeVcomps <- function(r, lambda, Z, data.comps) {
 #' @references Bobb, JF, Valeri L, Claus Henn B, Christiani DC, Wright RO, Mazumdar M, Godleski JJ, Coull BA (2015). Bayesian Kernel Machine Regression for Estimating the Health Effects of Multi-Pollutant Mixtures. Biostatistics 16, no. 3: 493-508.
 #' @references Banerjee S, Gelfand AE, Finley AO, Sang H (2008). Gaussian predictive process models for large spatial data sets. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 70(4), 825-848.
 #' @import utils
+#' 
+#' @examples
+#' ## First generate dataset
+#' set.seed(111)
+#' dat <- SimData(n = 50, M = 4)
+#' y <- dat$y
+#' Z <- dat$Z
+#' X <- dat$X
+#' 
+#' ## Fit model with component-wise variable selection
+#' ## Using only 100 iterations to make example run quickly
+#' ## Typically should use a large number of iterations for inference
+#' set.seed(111)
+#' fitkm <- kmbayes(y = y, Z = Z, X = X, iter = 100, verbose = FALSE, varsel = TRUE)
 kmbayes <- function(y, Z, X = NULL, iter = 1000, family = "gaussian", id = NULL, verbose = TRUE, Znew = NULL, starting.values = NULL, control.params = NULL, varsel = FALSE, groups = NULL, knots = NULL, ztest = NULL, rmethod = "varying", est.h = FALSE) {
   
   missingX <- is.null(X)
@@ -474,6 +488,23 @@ kmbayes <- function(y, Z, X = NULL, iter = 1000, family = "gaussian", id = NULL,
 #' @param ...	further arguments passed to or from other methods.
 #'  
 #' @export
+#' 
+#' @return No return value, prints basic summary of fit to console
+#' 
+#' @examples
+#' ## First generate dataset
+#' set.seed(111)
+#' dat <- SimData(n = 50, M = 4)
+#' y <- dat$y
+#' Z <- dat$Z
+#' X <- dat$X
+#' 
+#' ## Fit model with component-wise variable selection
+#' ## Using only 100 iterations to make example run quickly
+#' ## Typically should use a large number of iterations for inference
+#' set.seed(111)
+#' fitkm <- kmbayes(y = y, Z = Z, X = X, iter = 100, verbose = FALSE, varsel = TRUE)
+#' fitkm
 print.bkmrfit <- function(x, digits = 5, ...) {
   cat("Fitted object of class 'bkmrfit'\n")
   cat("Iterations:", x$iter, "\n")
@@ -493,6 +524,23 @@ print.bkmrfit <- function(x, digits = 5, ...) {
 #' @param ...	further arguments passed to or from other methods.
 #'  
 #' @export
+#' 
+#' @return No return value, prints more detailed summary of fit to console
+#' 
+#' @examples
+#' ## First generate dataset
+#' set.seed(111)
+#' dat <- SimData(n = 50, M = 4)
+#' y <- dat$y
+#' Z <- dat$Z
+#' X <- dat$X
+#' 
+#' ## Fit model with component-wise variable selection
+#' ## Using only 100 iterations to make example run quickly
+#' ## Typically should use a large number of iterations for inference
+#' set.seed(111)
+#' fitkm <- kmbayes(y = y, Z = Z, X = X, iter = 100, verbose = FALSE, varsel = TRUE)
+#' summary(fitkm)
 summary.bkmrfit <- function(object, q = c(0.025, 0.975), digits = 5, show_ests = TRUE, show_MH = TRUE, ...) {
   x <- object
   elapsed_time <- difftime(x$time2, x$time1)
@@ -562,4 +610,5 @@ summary.bkmrfit <- function(object, q = c(0.025, 0.975), digits = 5, show_ests =
       print(pips)
     }
   }
+  return()
 }

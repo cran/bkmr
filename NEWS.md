@@ -1,3 +1,23 @@
+# bkmr 0.2.2
+
+## Bug fixes
+
+* Corrected code that produced warning `length > 1 in coercion to logical`
+
+* Update functions that use deprecated functions from `dplyr` package 
+
+## Minor changes
+
+* No longer export the following functions:
+
+  * `CalcGroupPIPs`, `CalcWithinGroupPIPs`, and `CalcPIPs` as these should typically be calculated using the function `ExtractPIPs`
+
+  * `ComputePostmeanHnew.approx` and `ComputePostmeanHnew.exact` as these should typically be calculated using the function `ComputePostmeanHnew`
+  
+  * `set_verbose_opts` as this is only called internally
+
+* Expanded function documentation by adding example code
+
 # bkmr 0.2.1
 
 ## Bug fixes
@@ -10,7 +30,7 @@
 
 * Error no longer generated if starting values for h.hat are not positive 
 
-* When checking class of an object, use 'inherits()' instead of 'class()'
+* When checking class of an object, use `inherits()` instead of `class()`
 
 # bkmr 0.2.0
 
